@@ -19,11 +19,16 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: "refreshControlAction:", forControlEvents: UIControlEvents.ValueChanged)
+        tableView.insertSubview(refreshControl, atIndex: 0)
+        
         tableView.dataSource = self
         tableView.delegate = self
-        
-        
-        
+        refreshControlAction(refreshControl)
+    }
+    
+    func refreshControlAction(refreshControl: UIRefreshControl) {
         
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
         let url = NSURL(string:"https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")
@@ -35,7 +40,6 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         )
         
         MBProgressHUD.showHUDAddedTo(self.view, animated: true)
-
         
         let task : NSURLSessionDataTask = session.dataTaskWithRequest(request,
             completionHandler: { (dataOrNil, response, error) in
@@ -49,11 +53,12 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                             
                     }
                 }
+                self.tableView.reloadData()
+                refreshControl.endRefreshing()
                 MBProgressHUD.hideHUDForView(self.view, animated: true)
 
         });
         task.resume()
-
     }
 
     override func didReceiveMemoryWarning() {
