@@ -10,13 +10,14 @@ import UIKit
 import AFNetworking
 import MBProgressHUD
 
-class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate{
 
     @IBOutlet weak var tableView: UITableView!
-    
+    @IBOutlet weak var searchbarView: UISearchBar!
     @IBOutlet weak var errorView: ErrorMessageView!
     
-    var movies:[NSDictionary]?
+    var movies:[NSDictionary] = []
+    var fileredMovies:[NSDictionary] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,6 +28,9 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
         tableView.dataSource = self
         tableView.delegate = self
+        searchbarView.delegate = self
+        fileredMovies = movies
+        
         refreshControlAction(refreshControl)
         
         AFNetworkReachabilityManager.sharedManager().startMonitoring()
@@ -56,7 +60,10 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                         data, options:[]) as? NSDictionary {
                             NSLog("response: \(responseDictionary)")
                             
-                            self.movies = responseDictionary["results"] as? [NSDictionary]
+                            if let results = responseDictionary["results"] as? [NSDictionary] {
+                                self.movies = results
+                                self.updateFilteredMovies()
+                            }
                             self.tableView.reloadData()
                             
                     }
@@ -76,31 +83,70 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
     {
-        if let movies = movies {
-            return movies.count
-        } else {
-            return 0
-        }
+        return fileredMovies.count
     }
     
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
     {
         let cell = tableView.dequeueReusableCellWithIdentifier("MovieCell", forIndexPath: indexPath) as! MovieTableViewCell
-        let movie = movies![indexPath.row]
+        let movie = fileredMovies[indexPath.row]
         let title = movie["title"] as! String
         let overview = movie["overview"] as! String
         let posterPath = movie["poster_path"] as! String
         let baseUrl = "http://image.tmdb.org/t/p/w500/"
         
-        let imageUrl = NSURL(string: baseUrl + posterPath)
+        //let imageUrl = NSURL(string: baseUrl + posterPath)
+        let imageRequest = NSURLRequest(URL: NSURL(string: baseUrl + posterPath)!)
         
         cell.titleLabel.text = title
         cell.overviewLabel.text = overview
-        cell.imageviewLabel.setImageWithURL(imageUrl!)
+        cell.imageviewLabel.setImageWithURLRequest(
+            imageRequest,
+            placeholderImage: nil,
+            success: { (imageRequest, imageResponse, image) -> Void in
+                                if imageResponse != nil {
+                    cell.imageviewLabel.alpha = 0.0
+                    cell.imageviewLabel.image = image
+                    UIView.animateWithDuration(0.3, animations: { () -> Void in
+                        cell.imageviewLabel.alpha = 1.0
+                    })
+                } else {
+                    cell.imageviewLabel.image = image
+                }
+            },
+            failure: { (imageRequest, imageResponse, error) -> Void in
+                // do something for the failure condition
+        })
+        //cell.imageviewLabel.setImageWithURL(imageUrl!)
         
         
         return cell
+    }
+    
+    func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
+        updateFilteredMovies()
+        tableView.reloadData()
+    }
+    
+    func updateFilteredMovies() {
+        let searchText = searchbarView.text ?? ""
+        // When there is no text, filteredData is the same as the original data
+        if searchText.isEmpty {
+            fileredMovies = movies
+        } else {
+            // The user has entered text into the search box
+            // Use the filter method to iterate over all items in the data array
+            // For each item, return true if the item should be included and false if the
+            // item should NOT be included
+            fileredMovies = movies.filter({dictionary in
+                // If dataItem matches the searchText, return true to include it
+                if let title = dictionary["title"] as? String {
+                    return title.rangeOfString(searchText, options: .CaseInsensitiveSearch) != nil
+                }
+                return false
+            })
+        }
     }
 
     /*
