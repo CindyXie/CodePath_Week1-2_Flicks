@@ -14,6 +14,8 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
 
     @IBOutlet weak var tableView: UITableView!
     
+    @IBOutlet weak var errorView: ErrorMessageView!
+    
     var movies:[NSDictionary]?
     
     override func viewDidLoad() {
@@ -26,8 +28,14 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         tableView.dataSource = self
         tableView.delegate = self
         refreshControlAction(refreshControl)
+        
+        AFNetworkReachabilityManager.sharedManager().startMonitoring()
+        AFNetworkReachabilityManager.sharedManager().setReachabilityStatusChangeBlock { _ in
+            self.errorView.hidden = AFNetworkReachabilityManager.sharedManager().reachable
+
+        }
     }
-    
+
     func refreshControlAction(refreshControl: UIRefreshControl) {
         
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
