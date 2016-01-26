@@ -25,7 +25,35 @@ class DetailViewController: UIViewController {
         
         let overview = movie["overview"] as? String
         overviewLabel.text = overview
-        print (movie)
+        
+        let baseUrl = "http://image.tmdb.org/t/p/w500/"
+        
+        if let posterPath = movie["poster_path"] as? String,
+            let imageUrl = NSURL(string: baseUrl + posterPath) {
+                
+                let imageRequest = NSURLRequest(URL: imageUrl)
+                
+                posterImageview.setImageWithURLRequest(
+                    imageRequest,
+                    placeholderImage: nil,
+                    success: { (imageRequest, imageResponse, image) -> Void in
+                        if imageResponse != nil {
+                            self.posterImageview.alpha = 0.0
+                            self.posterImageview.image = image
+                            UIView.animateWithDuration(0.3, animations: { () -> Void in
+                                self.posterImageview.alpha = 1.0
+                            })
+                        } else {
+                            self.posterImageview.image = image
+                        }
+                    },
+                    failure: { (imageRequest, imageResponse,
+                        error) -> Void in
+                        // do something for the failure condition
+                })
+                //cell.imageviewLabel.setImageWithURL(imageUrl!)
+        }
+
    }
 
     override func didReceiveMemoryWarning() {

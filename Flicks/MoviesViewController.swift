@@ -93,33 +93,34 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         let movie = fileredMovies[indexPath.row]
         let title = movie["title"] as! String
         let overview = movie["overview"] as! String
-        let posterPath = movie["poster_path"] as! String
         let baseUrl = "http://image.tmdb.org/t/p/w500/"
+
+        if let posterPath = movie["poster_path"] as? String,
+            let imageUrl = NSURL(string: baseUrl + posterPath) {
+                
+                let imageRequest = NSURLRequest(URL: imageUrl)
         
-        //let imageUrl = NSURL(string: baseUrl + posterPath)
-        let imageRequest = NSURLRequest(URL: NSURL(string: baseUrl + posterPath)!)
-        
-        cell.titleLabel.text = title
-        cell.overviewLabel.text = overview
-        cell.imageviewLabel.setImageWithURLRequest(
-            imageRequest,
-            placeholderImage: nil,
-            success: { (imageRequest, imageResponse, image) -> Void in
-                                if imageResponse != nil {
-                    cell.imageviewLabel.alpha = 0.0
-                    cell.imageviewLabel.image = image
-                    UIView.animateWithDuration(0.3, animations: { () -> Void in
-                        cell.imageviewLabel.alpha = 1.0
-                    })
-                } else {
-                    cell.imageviewLabel.image = image
-                }
-            },
-            failure: { (imageRequest, imageResponse, error) -> Void in
-                // do something for the failure condition
-        })
-        //cell.imageviewLabel.setImageWithURL(imageUrl!)
-        
+                cell.titleLabel.text = title
+                cell.overviewLabel.text = overview
+                cell.imageviewLabel.setImageWithURLRequest(
+                    imageRequest,
+                    placeholderImage: nil,
+                    success: { (imageRequest, imageResponse, image) -> Void in
+                                        if imageResponse != nil {
+                            cell.imageviewLabel.alpha = 0.0
+                            cell.imageviewLabel.image = image
+                            UIView.animateWithDuration(0.3, animations: { () -> Void in
+                                cell.imageviewLabel.alpha = 1.0
+                            })
+                        } else {
+                            cell.imageviewLabel.image = image
+                        }
+                    },
+                    failure: { (imageRequest, imageResponse, error) -> Void in
+                        // do something for the failure condition
+                })
+                //cell.imageviewLabel.setImageWithURL(imageUrl!)
+        }
         
         return cell
     }
