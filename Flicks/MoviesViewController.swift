@@ -1,3 +1,4 @@
+
 //
 //  MoviesViewController.swift
 //  Flicks
@@ -59,7 +60,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                 if let data = dataOrNil {
                     if let responseDictionary = try! NSJSONSerialization.JSONObjectWithData(
                         data, options:[]) as? NSDictionary {
-                            NSLog("response: \(responseDictionary)")
+                            
                             
                             if let results = responseDictionary["results"] as? [NSDictionary] {
                                 self.movies = results
@@ -103,6 +104,8 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
                 cell.titleLabel.text = title
                 cell.overviewLabel.text = overview
+                cell.selectionStyle = .None
+
                 cell.imageviewLabel.setImageWithURLRequest(
                     imageRequest,
                     placeholderImage: nil,
@@ -160,7 +163,9 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         let indexPath = tableView.indexPathForCell(cell)
         let movie = movies[indexPath!.row]
         
+        //let nav = segue.destinationViewController as! UINavigationController
         let detailViewController = segue.destinationViewController as! DetailViewController
+        
         detailViewController.movie = movie
         // Get the new view contr]oller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
