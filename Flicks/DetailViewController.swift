@@ -1,3 +1,7 @@
+
+
+
+
 //
 //  DetailViewController.swift
 //  Flicks
@@ -31,33 +35,82 @@ class DetailViewController: UIViewController {
         overviewLabel.text = overview
         overviewLabel.sizeToFit()
         
-        let baseUrl = "http://image.tmdb.org/t/p/w500/"
+        //let baseUrl = "http://image.tmdb.org/t/p/w500/"
         
-        if let posterPath = movie["poster_path"] as? String,
-            let imageUrl = NSURL(string: baseUrl + posterPath) {
+        let baseSmallImageUrl = "https://image.tmdb.org/t/p/w45"
+        let baseLargeImageUrl = "https://image.tmdb.org/t/p/original"
+        let posterPath = movie["poster_path"] as? String
+        
+        let smallImageUrl = baseSmallImageUrl + posterPath!
+        let largeImageUrl = baseLargeImageUrl + posterPath!
+        
+        let smallImageRequest = NSURLRequest(URL: NSURL(string: smallImageUrl)!)
+        let largeImageRequest = NSURLRequest(URL: NSURL(string: largeImageUrl)!)
+        
+        self.posterImageview.setImageWithURLRequest(
+            smallImageRequest,
+            placeholderImage: nil,
+            success: { (smallImageRequest, smallImageResponse, smallImage) -> Void in
                 
-                let imageRequest = NSURLRequest(URL: imageUrl)
+                // smallImageResponse will be nil if the smallImage is already available
+                // in cache (might want to do something smarter in that case).
+                self.posterImageview.alpha = 0.0
+                self.posterImageview.image = smallImage;
                 
-                posterImageview.setImageWithURLRequest(
-                    imageRequest,
-                    placeholderImage: nil,
-                    success: { (imageRequest, imageResponse, image) -> Void in
-                        if imageResponse != nil {
-                            self.posterImageview.alpha = 0.0
-                            self.posterImageview.image = image
-                            UIView.animateWithDuration(0.3, animations: { () -> Void in
-                                self.posterImageview.alpha = 1.0
-                            })
-                        } else {
-                            self.posterImageview.image = image
-                        }
-                    },
-                    failure: { (imageRequest, imageResponse,
-                        error) -> Void in
-                        // do something for the failure condition
+                UIView.animateWithDuration(0.3, animations: { () -> Void in
+                    
+                    self.posterImageview.alpha = 1.0
+                    
+                    }, completion: { (sucess) -> Void in
+                        
+                        // The AFNetworking ImageView Category only allows one request to be sent at a time
+                        // per ImageView. This code must be in the completion block.
+                        self.posterImageview.setImageWithURLRequest(
+                            largeImageRequest,
+                            placeholderImage: smallImage,
+                            success: { (largeImageRequest, largeImageResponse, largeImage) -> Void in
+                                
+                                self.posterImageview.image = largeImage;
+                                
+                            },
+                            failure: { (request, response, error) -> Void in
+                                self.posterImageview.image = smallImage;
+                        })
                 })
-                //cell.imageviewLabel.setImageWithURL(imageUrl!)
-        }
+            },
+            failure: { (request, response, error) -> Void in
+                // do something for the failure condition
+                // possibly try to get the large image
+                
+        })
+        
+        
+        
+//        if let posterPath = movie["poster_path"] as? String,
+//            let imageUrl = NSURL(string: baseUrl + posterPath) {
+//                
+//                let imageRequest = NSURLRequest(URL: imageUrl)
+//                
+//                posterImageview.setImageWithURLRequest(
+//                    imageRequest,
+//                    placeholderImage: nil,
+//                    success: { (imageRequest, imageResponse, image) -> Void in
+//                        if imageResponse != nil {
+//                            self.posterImageview.alpha = 0.0
+//                            self.posterImageview.image = image
+//                            UIView.animateWithDuration(0.3, animations: { () -> Void in
+//                                self.posterImageview.alpha = 1.0
+//                            })
+//                        } else {
+//                            self.posterImageview.image = image
+//                        }
+//                    },
+//                    failure: { (imageRequest, imageResponse,
+//                        error) -> Void in
+//                        // do something for the failure condition
+//                })
+//                //cell.imageviewLabel.setImageWithURL(imageUrl!)
+//        }
 
    }
 
