@@ -96,6 +96,10 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         let title = movie["title"] as! String
         let overview = movie["overview"] as! String
         let baseUrl = "http://image.tmdb.org/t/p/w500/"
+        
+        let backgroundView = UIView()
+        backgroundView.backgroundColor = UIColor.grayColor()
+        cell.selectedBackgroundView = backgroundView
 
         if let posterPath = movie["poster_path"] as? String,
             let imageUrl = NSURL(string: baseUrl + posterPath) {
@@ -104,7 +108,6 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
                 cell.titleLabel.text = title
                 cell.overviewLabel.text = overview
-                cell.selectionStyle = .None
 
                 cell.imageviewLabel.setImageWithURLRequest(
                     imageRequest,
@@ -163,7 +166,6 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         let indexPath = tableView.indexPathForCell(cell)
         let movie = movies[indexPath!.row]
         
-        //let nav = segue.destinationViewController as! UINavigationController
         let detailViewController = segue.destinationViewController as! DetailViewController
         
         detailViewController.movie = movie

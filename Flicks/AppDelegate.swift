@@ -22,6 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         
         let nowPlayingNavigationController = storyboard.instantiateViewControllerWithIdentifier("MoviesNavigationController") as! UINavigationController
+        
         let nowPlayingViewController = nowPlayingNavigationController.topViewController as! MoviesViewController
         
         nowPlayingViewController.endPoint = "now_playing"
