@@ -77,7 +77,7 @@ The following **required** functionality is completed:
 The following **optional** features are implemented:
 
 - [X] For the large poster, load the low resolution image first and then switch to the high resolution image when complete.
-- [ ] Customize the navigation bar(working on it, gonna update this app on Sunday night).
+- [ ] Customize the navigation bar.
 
 The following **additional** features are implemented:
 
